@@ -1,25 +1,28 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"regexp"
-	"fmt"
-	"strings"
 	"path"
+	"regexp"
+	"strings"
 )
 
+// Page data struct for page render
 type Page struct {
 	Title string
 	Body  []byte
 }
 
+// ListPageData list of Page
 type ListPageData struct {
 	PageTitle string
 	Todos     []Page
 }
+
 const baseTemplatePath = "template/"
 const baseNotesPath = "notes/"
 
@@ -69,7 +72,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 var templates = template.Must(template.ParseFiles("template/edit.html", "template/view.html"))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	err := templates.ExecuteTemplate(w, tmpl + ".html", p)
+	err := templates.ExecuteTemplate(w, tmpl+".html", p)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -92,19 +95,19 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 func listHandler(w http.ResponseWriter, r *http.Request) {
 	files, err := ioutil.ReadDir("./notes")
 	if err != nil {
-			log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	pages := []Page{}
 	for _, file := range files {
-			fn := file.Name()
-			p := Page{Title: strings.TrimSuffix(fn, path.Ext(fn))}
-			pages = append(pages, p)
+		fn := file.Name()
+		p := Page{Title: strings.TrimSuffix(fn, path.Ext(fn))}
+		pages = append(pages, p)
 	}
 
 	data := ListPageData{
 		PageTitle: "My notes list",
-		Todos: pages,
+		Todos:     pages,
 	}
 
 	tmpl := template.Must(template.ParseFiles("template/list.html"))
@@ -115,7 +118,7 @@ func listHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func addHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("method:", r.Method) //get request method
+	// fmt.Println("add method:", r.Method) //get request method
 	if r.Method == "GET" {
 		tmpl := template.Must(template.ParseFiles("template/add.html"))
 		err := tmpl.Execute(w, nil)
@@ -142,6 +145,6 @@ func main() {
 	http.HandleFunc("/save/", makeHandler(saveHandler))
 	http.HandleFunc("/", listHandler)
 	http.HandleFunc("/add", addHandler)
-
+	log.Println("The application is running on port 8686...")
 	log.Fatal(http.ListenAndServe(":8686", nil))
 }
