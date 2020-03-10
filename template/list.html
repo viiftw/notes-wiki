@@ -1,0 +1,15 @@
+<h1>{{.PageTitle}}</h1>
+<a href="/add" class="w3-btn w3-black"><button>Add note</button></a>
+<ul>
+    {{range .Todos}}
+    <li><a href="/view/{{.Title}}" target="_blank" >{{.Title}}</a></li>
+    {{end}}
+</ul>
+<style>
+  a {color:green;}
+  form {
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+  }
+</style>
